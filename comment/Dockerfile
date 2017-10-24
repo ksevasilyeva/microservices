@@ -7,7 +7,7 @@ ADD Gemfile* $APP_HOME/
 RUN bundle install
 ADD . $APP_HOME
 
-ENV COMMENT_DATABASE_HOST comment_db
+ENV COMMENT_DATABASE_HOST comment_mongo
 ENV COMMENT_DATABASE comments
 
 CMD ["puma"]
