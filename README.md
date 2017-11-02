@@ -38,3 +38,13 @@ docker run -d --network=reddit --network-alias=post ksevasilyeva/post:1.0
 docker run -d --network=reddit --network-alias=comment-ui ksevasilyeva/comment:1.0
 docker run -d --network=reddit -p 9292:9292 ksevasilyeva/ui:1.0
 ```
+
+### Run "Reddit-app with docker-compose"
+- Prereq: installed on local machine docker-compose
+
+- Use example.env to make your own copy of ```.env``` file with variables
+```
+cd reddit-app/
+docker-compose up -d  #run the app
+docker-compose ps #check app is running
+```
