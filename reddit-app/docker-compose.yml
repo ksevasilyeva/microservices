@@ -25,6 +25,7 @@ services:
     networks:
       - back_net
       - front_net
+
   prometheus:
     image: ${USERNAME}/prometheus
     ports:
@@ -32,6 +33,7 @@ services:
     networks:
       - back_net
       - front_net
+
   node-exporter:
     image: prom/node-exporter:v0.15.0
     user: root
@@ -43,6 +45,15 @@ services:
       - '--path.procfs=/host/proc'
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.ignored-mount-points="^/(sys|proc|dev|host|etc)($$|/)"'
+    networks:
+      - back_net
+      - front_net
+
+  mongodb_exporter:
+    image: eses/mongodb_exporter
+    command: -mongodb.uri mongodb://mongo_db:27017
+    expose:
+      - 9104
     networks:
       - back_net
       - front_net
