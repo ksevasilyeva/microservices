@@ -39,8 +39,24 @@ docker run -d --network=reddit --network-alias=comment-ui ksevasilyeva/comment:1
 docker run -d --network=reddit -p 9292:9292 ksevasilyeva/ui:1.0
 ```
 
-### Run "Reddit-app with docker-compose"
+### Run "Reddit-app via docker-compose" with Prometheus monitoring
 - Prereq: installed on local machine docker-compose
+```
+export USER_NAME=<username> // your DockerHub login
+```
+
+- Build Prometheus image
+```
+cd prometheus
+docker build -t $USER_NAME/prometheus .
+
+```
+- Build microservices images:
+```
+/ui (microservices ✔) $ bash docker_build.sh
+/post-py (microservices ✔) $ bash docker_build.sh
+/comment (microservices ✔) $ bash docker_build.sh
+```
 
 - Use example.env to make your own copy of ```.env``` file with variables
 ```
@@ -48,3 +64,6 @@ cd reddit-app/
 docker-compose up -d  #run the app
 docker-compose ps #check app is running
 ```
+
+- App will be running on :9292 port
+- Prometheus will be running on 9090 port
