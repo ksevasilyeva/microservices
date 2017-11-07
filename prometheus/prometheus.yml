@@ -24,5 +24,10 @@ scrape_configs:
 
   - job_name: 'mongo'
     static_configs:
-    - targets:
-      - 'mongodb_exporter:9104'
+      - targets:
+        - 'mongodb_exporter:9104'
+
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets:
+        - 'cadvisor:8080'
