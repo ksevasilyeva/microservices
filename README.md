@@ -67,3 +67,36 @@ docker-compose ps #check app is running
 
 - App will be running on :9292 port
 - Prometheus will be running on 9090 port
+
+### Run "Reddit-app in docker-swarm cluster
+
+- Build microservices images
+- Run instances <master-1><worker-1><worker-2>:
+```
+docker-machine create --driver google \
+   --google-project  dockerswarm-188616  \
+   --google-zone europe-west1-b \
+   --google-machine-type g1-small \
+   --google-machine-image $(gcloud compute images list --filter ubuntu-1604-lts --uri) \
+   <instance name>
+```
+- On master node init cluster:
+```
+docker swarm init
+```
+- Join worker-nodes to cluster:
+```
+docker swarm join --token <token> <advertise manager address>:2377
+```
+- To check cluster state - run on Master:
+```
+docker node ls
+```
+- Deploy services to cluster
+```
+docker stack deploy --compose-file=<(docker-compose -f docker-compose.yml config 2>/dev/null) DEV
+```
+- Check services states
+```
+docker stack services DEV
+```
