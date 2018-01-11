@@ -2,112 +2,96 @@ version: '3.3'
 services:
   mongo_db:
     image: mongo:${MONGO_VERSION}
+    deploy:
+      placement:
+        constraints:
+          - node.labels.reliability == high
     volumes:
-      - post_db:/data/db
+      - mongo_data:/data/db
     networks:
       back_net:
         aliases:
           - post_mongo
           - comment_mongo
-  ui:
-    image: ${USERNAME}/ui:${UI_VERSION}
-    ports:
-      - ${UI_EXTERNAL_PORT}:9292/tcp
-    networks:
-      - front_net
+
   post:
-    image: ${USERNAME}/post:${POST_VERSION}
+    image: ${USER_NAME}/post:${POST_VERSION}
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 10
+        delay: 1s
+      resources:
+        limits:
+          cpus: '0.30'
+          memory: 300M
+      update_config:
+        delay: 10s
+        parallelism: 2
+        failure_action: rollback
+      mode: replicated
+      replicas: 4
+      placement:
+        constraints:
+          - node.role == worker
     networks:
-      - back_net
       - front_net
+      - back_net
+
   comment:
-    image: ${USERNAME}/comment:${COMMENT_VERSION}
+    image: ${USER_NAME}/comment:${COMMENT_VERSION}
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 10
+        delay: 1s
+      resources:
+        limits:
+          cpus: '0.30'
+          memory: 300M
+      update_config:
+        delay: 10s
+        parallelism: 2
+        failure_action: rollback
+      mode: replicated
+      replicas: 4
+      placement:
+        constraints:
+          - node.role == worker
     networks:
-      - back_net
       - front_net
-
-  cadvisor:
-    image: google/cadvisor:latest
-    volumes:
-      - '/:/rootfs:ro'
-      - '/var/run:/var/run:rw'
-      - '/sys:/sys:ro'
-      - '/var/lib/docker/:/var/lib/docker:ro'
-    ports:
-      - '8080:8080'
-    networks:
       - back_net
-      - front_net
 
-  grafana:
-    image: grafana/grafana
-    volumes:
-      - grafana_data:/var/lib/grafana
+  ui:
+    image: ${USER_NAME}/ui:${UI_VERSION}
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=secret
-    depends_on:
-      - prometheus
+      - ENV=DEV
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+        delay: 3s
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 150M
+      update_config:
+        delay: 5s
+        parallelism: 1
+        failure_action: rollback
+      mode: replicated
+      replicas: 4
+      placement:
+        constraints:
+          - node.role == worker
     ports:
-      - 3000:3000
+      - "${UI_EXTERNAL_PORT}:9292/tcp"
     networks:
-      - back_net
-      - front_net
-
-  prometheus:
-    image: ${USERNAME}/prometheus
-    ports:
-      - '9090:9090'
-    networks:
-      - back_net
-      - front_net
-
-  node-exporter:
-    image: prom/node-exporter:v0.15.0
-    user: root
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
-    command:
-      - '--path.procfs=/host/proc'
-      - '--path.sysfs=/host/sys'
-      - '--collector.filesystem.ignored-mount-points="^/(sys|proc|dev|host|etc)($$|/)"'
-    networks:
-      - back_net
-      - front_net
-
-  mongodb_exporter:
-    image: eses/mongodb_exporter
-    command: -mongodb.uri mongodb://mongo_db:27017
-    expose:
-      - 9104
-    networks:
-      - back_net
-      - front_net
-
-  alertmanager:
-    image: ${USER_NAME}/alertmanager
-    command:
-      - '-config.file=/etc/alertmanager/config.yml'
-    ports:
-      - 9093:9093
-    networks:
-      - back_net
       - front_net
 
 volumes:
-  post_db:
-  grafana_data:
+  mongo_data: {}
 
 networks:
-  front_net:
-    driver: bridge
-    ipam:
-      config:
-      - subnet: 10.0.1.0/24
-  back_net:
-    driver: bridge
-    ipam:
-      config:
-      - subnet: 10.0.2.0/24
+  back_net: {}
+  front_net: {}
