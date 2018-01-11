@@ -30,7 +30,7 @@ services:
       - front_net
 
   prometheus:
-    image: ${USERNAME}/prometheus
+    image: ${USER_NAME}/prometheus
     ports:
       - '9090:9090'
     networks:

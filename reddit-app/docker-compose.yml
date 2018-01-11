@@ -15,7 +15,7 @@ services:
           - comment_mongo
 
   post:
-    image: ${USERNAME}/post:${POST_VERSION}
+    image: ${USER_NAME}/post:${POST_VERSION}
     deploy:
       restart_policy:
         condition: on-failure
@@ -39,7 +39,7 @@ services:
       - back_net
 
   comment:
-    image: ${USERNAME}/comment:${COMMENT_VERSION}
+    image: ${USER_NAME}/comment:${COMMENT_VERSION}
     deploy:
       restart_policy:
         condition: on-failure
@@ -63,7 +63,7 @@ services:
       - back_net
 
   ui:
-    image: ${USERNAME}/ui:${UI_VERSION}
+    image: ${USER_NAME}/ui:${UI_VERSION}
     environment:
       - ENV=DEV
     deploy:
